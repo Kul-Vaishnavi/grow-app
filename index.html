@@ -165,13 +165,24 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .config-screen p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;max-width:320px}
 .config-input{width:100%;max-width:360px;margin-bottom:12px}
 
-/* CONNECTOR GRID */
-.connector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
-.connector-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
-.connector-btn:hover{border-color:var(--green-light);background:var(--green-pale)}
-.connector-btn:active{transform:scale(0.96)}
-.connector-icon{font-size:20px}
 .section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:4px}
+
+/* JOB CARDS */
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.job-card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.job-card-company{font-size:12px;color:var(--muted);margin-bottom:8px}
+.job-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.job-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--sky-pale);color:var(--sky-dark)}
+.job-tag.remote{background:var(--green-pale);color:var(--green)}
+.job-tag.type{background:var(--yellow);color:#7C4A00}
+.job-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.source-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--purple-pale);color:var(--purple-dark);display:inline-block;margin-bottom:6px}
+.job-actions{display:flex;gap:6px;flex-wrap:wrap}
+.find-results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.results-count{font-size:11px;font-weight:600;color:var(--muted)}
+.source-tabs{display:flex;gap:6px;margin-bottom:12px}
+.source-tab{flex:1;padding:7px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.18s;text-align:center}
+.source-tab.active{border-color:var(--green-light);background:var(--green-pale);color:var(--green)}
 </style>
 </head>
 <body>
@@ -285,7 +296,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <p>search jobs & get AI help applying</p>
   </div>
 
-  <!-- Job Search Connectors -->
+  <!-- Job Search -->
   <div class="card">
     <div class="section-label">search jobs</div>
     <div class="form-group">
@@ -293,31 +304,28 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <input type="text" id="find-query" placeholder="e.g. Product Designer, Data Analyst..." />
     </div>
     <div class="form-group">
-      <label class="form-label">location</label>
-      <input type="text" id="find-location" placeholder="e.g. New York, Remote..." />
+      <label class="form-label">location <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — leave blank for remote)</span></label>
+      <input type="text" id="find-location" placeholder="e.g. New York, London..." />
     </div>
-    <div class="section-label" style="margin-top:8px">open search on</div>
-    <div class="connector-grid">
-      <button class="connector-btn" onclick="searchOn('indeed')">
-        <span class="connector-icon">🔵</span>Indeed
-      </button>
-      <button class="connector-btn" onclick="searchOn('linkedin')">
-        <span class="connector-icon">💼</span>LinkedIn
-      </button>
-      <button class="connector-btn" onclick="searchOn('glassdoor')">
-        <span class="connector-icon">🟢</span>Glassdoor
-      </button>
-      <button class="connector-btn" onclick="searchOn('wellfound')">
-        <span class="connector-icon">🚀</span>Wellfound
-      </button>
-      <button class="connector-btn" onclick="searchOn('google')">
-        <span class="connector-icon">🔍</span>Google Jobs
-      </button>
-      <button class="connector-btn" onclick="searchOn('simplyhired')">
-        <span class="connector-icon">📋</span>SimplyHired
-      </button>
+    <div class="source-tabs">
+      <button class="source-tab active" id="tab-remotive" onclick="setSourceTab('remotive')">🌍 Remote</button>
+      <button class="source-tab" id="tab-arbeitnow" onclick="setSourceTab('arbeitnow')">🏢 All Jobs</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">opens the job board with your search — find a job you like, then use the AI assistant below to help apply!</div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn btn-primary" style="flex:1" onclick="searchJobs()">🔍 search jobs</button>
+    </div>
+  </div>
+
+  <!-- Job Results -->
+  <div id="job-results-section" style="display:none">
+    <div class="find-results-header">
+      <div class="results-count" id="results-count"></div>
+      <button class="btn btn-outline btn-sm" onclick="clearResults()">clear</button>
+    </div>
+    <div id="job-results-list"></div>
+    <div id="job-results-loading" style="display:none">
+      <div class="ai-loading" style="justify-content:center;padding:20px 0"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>finding jobs...</span></div>
+    </div>
   </div>
 
   <!-- My Profile -->
@@ -949,21 +957,149 @@ function copyPackSection(id) {
   if (el) navigator.clipboard.writeText(el.textContent).then(() => alert('copied! ✨'));
 }
 
-// ── FIND: JOB CONNECTORS ─────────────────────────────────────────────────
-function searchOn(platform) {
+// ── FIND: JOB SEARCH ─────────────────────────────────────────────────────
+let activeSource = 'remotive';
+
+function setSourceTab(src) {
+  activeSource = src;
+  document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + src).classList.add('active');
+}
+
+async function searchJobs() {
   const query = document.getElementById('find-query').value.trim();
-  const loc   = document.getElementById('find-location').value.trim();
-  const q = encodeURIComponent(query);
-  const l = encodeURIComponent(loc);
-  const urls = {
-    indeed:     `https://www.indeed.com/jobs?q=${q}&l=${l}`,
-    linkedin:   `https://www.linkedin.com/jobs/search/?keywords=${q}&location=${l}`,
-    glassdoor:  `https://www.glassdoor.com/Job/jobs.htm?sc.keyword=${encodeURIComponent(query + (loc ? ' ' + loc : ''))}`,
-    wellfound:  `https://wellfound.com/jobs?role=${q}&location=${l}`,
-    google:     `https://www.google.com/search?q=${encodeURIComponent(query + ' jobs' + (loc ? ' ' + loc : ''))}&ibp=htl;jobs`,
-    simplyhired:`https://www.simplyhired.com/search?q=${q}&l=${l}`
-  };
-  if (urls[platform]) window.open(urls[platform], '_blank');
+  if (!query) { alert('please enter a job title or keywords!'); return; }
+
+  const section = document.getElementById('job-results-section');
+  const list    = document.getElementById('job-results-list');
+  const loading = document.getElementById('job-results-loading');
+
+  section.style.display = '';
+  list.innerHTML = '';
+  loading.style.display = '';
+  document.getElementById('results-count').textContent = '';
+
+  let jobs = [];
+  try {
+    if (activeSource === 'remotive') {
+      jobs = await fetchRemotive(query);
+    } else {
+      jobs = await fetchArbeitnow(query);
+    }
+  } catch(e) {
+    loading.style.display = 'none';
+    list.innerHTML = `<div class="card" style="text-align:center;color:var(--muted);font-size:13px">⚠️ couldn't load jobs — check your internet and try again.</div>`;
+    return;
+  }
+
+  loading.style.display = 'none';
+
+  if (!jobs.length) {
+    list.innerHTML = `<div class="card" style="text-align:center;padding:24px"><div style="font-size:28px;margin-bottom:8px">🔍</div><div style="font-size:13px;color:var(--muted)">no results found. try different keywords or switch source tab.</div></div>`;
+    return;
+  }
+
+  document.getElementById('results-count').textContent = `${jobs.length} jobs found`;
+  renderJobCards(jobs);
+}
+
+async function fetchRemotive(query) {
+  const url = `https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=20`;
+  const res  = await fetch(url);
+  const data = await res.json();
+  return (data.jobs || []).map(j => ({
+    id:       j.id,
+    title:    j.title,
+    company:  j.company_name,
+    location: j.candidate_required_location || 'Remote',
+    type:     j.job_type || '',
+    tags:     (j.tags || []).slice(0,4),
+    desc:     stripHtml(j.description || ''),
+    url:      j.url,
+    source:   'Remotive',
+    remote:   true
+  }));
+}
+
+async function fetchArbeitnow(query) {
+  const loc = document.getElementById('find-location').value.trim();
+  let url = `https://www.arbeitnow.com/api/job-board-api?search=${encodeURIComponent(query)}`;
+  if (loc) url += `&location=${encodeURIComponent(loc)}`;
+  const res  = await fetch(url);
+  const data = await res.json();
+  return (data.data || []).slice(0,20).map(j => ({
+    id:       j.slug,
+    title:    j.title,
+    company:  j.company_name,
+    location: j.location || 'See listing',
+    type:     j.job_types?.[0] || '',
+    tags:     (j.tags || []).slice(0,4),
+    desc:     stripHtml(j.description || ''),
+    url:      j.url,
+    source:   'Arbeitnow',
+    remote:   j.remote
+  }));
+}
+
+function stripHtml(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent || d.innerText || '';
+}
+
+function renderJobCards(jobs) {
+  const list = document.getElementById('job-results-list');
+  list.innerHTML = '';
+  jobs.forEach(j => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    const tagsHtml = [
+      j.remote ? `<span class="job-tag remote">🌍 Remote</span>` : '',
+      j.type   ? `<span class="job-tag type">${j.type}</span>` : '',
+      ...j.tags.map(t => `<span class="job-tag">${t}</span>`)
+    ].filter(Boolean).join('');
+
+    const descShort = j.desc.slice(0, 200).trim() + (j.desc.length > 200 ? '...' : '');
+    const safeDesc  = descShort.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeTitle   = j.title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeCompany = j.company.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    card.innerHTML = `
+      <span class="source-chip">${j.source}</span>
+      <div class="job-card-title">${safeTitle}</div>
+      <div class="job-card-company">${safeCompany} · ${j.location}</div>
+      <div class="job-card-tags">${tagsHtml}</div>
+      <div class="job-desc">${safeDesc}</div>
+      <div class="job-actions">
+        <button class="btn btn-ai btn-sm" onclick="prefillApplyFromJob(${JSON.stringify(j.title).replace(/"/g,'&quot;')}, ${JSON.stringify(j.company).replace(/"/g,'&quot;')}, ${JSON.stringify(j.desc.slice(0,3000)).replace(/"/g,'&quot;')})">✨ AI help applying</button>
+        <button class="btn btn-outline btn-sm" onclick="quickTrackJob(${JSON.stringify(j.title).replace(/"/g,'&quot;')}, ${JSON.stringify(j.company).replace(/"/g,'&quot;')}, ${JSON.stringify(j.url).replace(/"/g,'&quot;')})">+ track it</button>
+        <a href="${j.url}" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none">🔗 view</a>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function prefillApplyFromJob(title, company, desc) {
+  document.getElementById('pack-jd').value  = `${title} at ${company}\n\n${desc}`;
+  document.getElementById('apply-jd').value = `${title} at ${company}\n\n${desc}`;
+  // scroll to pack generator
+  document.getElementById('pack-jd').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function quickTrackJob(title, company, url) {
+  document.getElementById('modal-app-title').textContent = 'add application 🌱';
+  document.getElementById('app-edit-id').value = '';
+  document.getElementById('app-company').value = company;
+  document.getElementById('app-role').value    = title;
+  document.getElementById('app-link').value    = url;
+  document.getElementById('app-notes').value   = '';
+  document.getElementById('app-status').value  = 'saved';
+  openModal('modal-add-app');
+}
+
+function clearResults() {
+  document.getElementById('job-results-section').style.display = 'none';
+  document.getElementById('job-results-list').innerHTML = '';
 }
 
 // ── FIND: AI APPLY ASSISTANT ──────────────────────────────────────────────
