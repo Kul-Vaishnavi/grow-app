@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Grow">
+<title>grow 🌱</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+:root {
+  --bg: #F0F7F4;
+  --surface: #FFFFFF;
+  --green: #2D6A4F;
+  --green-light: #52B788;
+  --green-pale: #D8F3DC;
+  --yellow: #FFD166;
+  --yellow-dark: #F4A261;
+  --coral: #FF6B6B;
+  --coral-pale: #FFE0E0;
+  --sky: #A8DADC;
+  --sky-dark: #457B9D;
+  --sky-pale: #E0F4F5;
+  --purple: #C77DFF;
+  --purple-pale: #F0E0FF;
+  --purple-dark: #7B2FBE;
+  --text: #1A2E1A;
+  --muted: #6B8F71;
+  --border: rgba(45,106,79,0.12);
+  --shadow: 0 2px 16px rgba(45,106,79,0.08);
+}
+
+html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overscroll-behavior:none}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(45,106,79,0.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 14px;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;gap:4px}
+.nav-icon{font-size:20px;transition:transform 0.2s}
+.nav-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.3px}
+.nav-btn.active .nav-label{color:var(--green)}
+.nav-btn.active .nav-icon{transform:scale(1.15)}
+
+/* PAGES */
+.page{display:none;max-width:480px;margin:0 auto;padding:16px 14px 100px;animation:fadeUp 0.3s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.page-header{padding:10px 0 18px}
+.page-header h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+.page-header p{font-size:13px;color:var(--muted);margin-top:3px;font-weight:400}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green)}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;letter-spacing:0.3px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);animation:popIn 0.3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(0.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* STATUS BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:0.2px}
+.badge-applied   {background:#DBEAFE;color:#1E40AF}
+.badge-interview {background:var(--yellow);color:#7C4A00}
+.badge-offer     {background:var(--green-pale);color:var(--green)}
+.badge-rejected  {background:var(--coral-pale);color:#B91C1C}
+.badge-ghosted   {background:#F3F4F6;color:#6B7280}
+.badge-saved     {background:var(--purple-pale);color:var(--purple-dark)}
+.badge-connected {background:var(--green-pale);color:var(--green)}
+.badge-pending   {background:var(--sky-pale);color:var(--sky-dark)}
+.badge-sent      {background:var(--green-pale);color:var(--green)}
+
+/* FORM ELEMENTS */
+.form-group{margin-bottom:12px}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:5px;display:block}
+input,select,textarea{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:400;color:var(--text);outline:none;transition:border-color 0.2s;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green-light)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{resize:none;line-height:1.5}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B8F71' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:12px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s}
+.btn:active{transform:scale(0.96)}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:hover{background:#235e3f}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--green-light)}
+.btn-ai{background:var(--purple-pale);color:var(--purple-dark);border:1.5px solid var(--purple)}
+.btn-ai:hover{background:var(--purple);color:white}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:10px}
+.btn-danger{background:var(--coral-pale);color:#B91C1C}
+
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,46,26,0.4);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s}
+.modal-overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 18px 36px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:16px}
+
+/* AI RESPONSE */
+.ai-box{background:var(--purple-pale);border:1.5px solid var(--purple);border-radius:14px;padding:14px;margin-top:12px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--purple-dark);font-size:13px;font-weight:600;padding:12px 0}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:bounce 1.2s infinite}
+.ai-dot:nth-child(2){animation-delay:0.2s}
+.ai-dot:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(0.8);opacity:0.5}40%{transform:scale(1.2);opacity:1}}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:8px}
+.empty p{font-size:13px;font-weight:500}
+
+/* SYNC BAR */
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:12px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background 0.3s;flex-shrink:0}
+.sync-dot.ok{background:var(--green-light)}
+.sync-dot.syncing{background:var(--yellow-dark);animation:blink 0.8s infinite}
+.sync-dot.err{background:var(--coral)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* APP CARD DETAILS */
+.app-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.app-card-company{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.app-card-role{font-size:12px;color:var(--muted);margin-top:2px}
+.app-card-actions{display:flex;gap:6px;align-items:center}
+.icon-action{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;border-radius:8px;opacity:0.5;transition:opacity 0.2s}
+.icon-action:hover{opacity:1}
+
+/* NETWORK CARD */
+.net-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;flex-shrink:0}
+
+/* PROGRESS BAR */
+.prog-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.prog-top{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.prog-bg{background:var(--bg);border-radius:10px;height:8px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green-light),var(--sky-dark));transition:width 0.6s cubic-bezier(.34,1.56,.64,1)}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:300;transition:opacity 0.4s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-icon{font-size:44px;animation:grow-spin 1.4s infinite}
+@keyframes grow-spin{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.2) rotate(20deg)}}
+.loading-text{font-size:13px;font-weight:600;color:var(--muted)}
+
+/* NUDGE */
+.nudge{background:var(--yellow);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.nudge-text{font-size:12px;font-weight:700;color:#7C4A00;flex:1}
+.nudge-btn{background:var(--yellow-dark);color:white;border:none;border-radius:9px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* CONFIG SCREEN */
+.config-screen{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.config-screen.hidden{display:none}
+.config-icon{font-size:52px;margin-bottom:12px}
+.config-screen h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px}
+.config-screen p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;max-width:320px}
+.config-input{width:100%;max-width:360px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div class="config-screen" id="config-screen">
+  <div class="config-icon">🌱</div>
+  <h2>welcome to grow</h2>
+  <p>paste your Google Apps Script Web App URL to get started. your data will sync across all your devices!</p>
+  <input class="config-input" type="text" id="api-input" placeholder="https://script.google.com/macros/s/..." />
+  <button class="btn btn-primary" style="width:100%;max-width:360px" onclick="saveConfig()">let's grow 🌱</button>
+  <p style="margin-top:16px;font-size:11px;color:var(--muted)">don't have the URL yet? <a href="#" onclick="skipConfig()" style="color:var(--green)">use local storage for now</a></p>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-icon">🌱</div>
+  <div class="loading-text">loading your job hunt...</div>
+</div>
+
+<!-- PAGE: TRACKER -->
+<div class="page active" id="page-tracker">
+  <div class="page-header">
+    <h1>grow 🌱</h1>
+    <p>your job search, but make it fun</p>
+  </div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">connecting...</span></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-applied">0</div><div class="stat-lbl">applied</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-interview">0</div><div class="stat-lbl">interviews</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-offer">0</div><div class="stat-lbl">offers 🎉</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-top"><span>pipeline progress</span><span id="prog-pct">0%</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="nudge">
+    <span id="nudge-icon">💪</span>
+    <span class="nudge-text" id="nudge-text">Apply to one job today. Just one!</span>
+    <button class="nudge-btn" onclick="nextNudge()">next tip</button>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">applications</div>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-app')">+ add job</button>
+  </div>
+  <div id="apps-list"></div>
+</div>
+
+<!-- PAGE: NETWORK -->
+<div class="page" id="page-network">
+  <div class="page-header">
+    <h1>network 🤝</h1>
+    <p>track your connections & recruiters</p>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">contacts</div>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-net')">+ add contact</button>
+  </div>
+  <div id="net-list"></div>
+</div>
+
+<!-- PAGE: EMAIL -->
+<div class="page" id="page-email">
+  <div class="page-header">
+    <h1>cold email ✉️</h1>
+    <p>AI writes it, you send it</p>
+  </div>
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">recruiter / person name</label>
+      <input type="text" id="email-to" placeholder="e.g. Sarah Chen" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">their company</label>
+      <input type="text" id="email-company" placeholder="e.g. Google" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">role you want</label>
+      <input type="text" id="email-role" placeholder="e.g. Product Designer" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">a little about you (2-3 lines)</label>
+      <textarea id="email-about" rows="3" placeholder="e.g. I'm a designer with 2 years experience in mobile apps, currently looking for my next opportunity..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">tone</label>
+      <select id="email-tone">
+        <option value="friendly and professional">friendly & professional</option>
+        <option value="confident and direct">confident & direct</option>
+        <option value="casual and warm">casual & warm</option>
+        <option value="formal">formal</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ai" onclick="generateEmail()">✨ write my email</button>
+    </div>
+    <div id="email-result"></div>
+    <div class="btn-row" id="email-actions" style="display:none">
+      <button class="btn btn-primary btn-sm" onclick="copyEmail()">📋 copy email</button>
+      <button class="btn btn-outline btn-sm" onclick="saveEmail()">💾 save it</button>
+    </div>
+  </div>
+  <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:4px">saved emails</div>
+  <div id="saved-emails-list"></div>
+</div>
+
+<!-- PAGE: RESUME -->
+<div class="page" id="page-resume">
+  <div class="page-header">
+    <h1>tailor ✂️</h1>
+    <p>customize your resume & cover letter</p>
+  </div>
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">job description (paste it here)</label>
+      <textarea id="jd-text" rows="5" placeholder="paste the full job description..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">your current resume / key points</label>
+      <textarea id="resume-text" rows="5" placeholder="paste your resume or key skills, experience, achievements..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">what do you want?</label>
+      <select id="tailor-type">
+        <option value="bullet points for my resume tailored to this job">📝 tailored resume bullets</option>
+        <option value="a cover letter for this job">💌 full cover letter</option>
+        <option value="keywords I should add to my resume to match this job">🔑 keywords to add</option>
+        <option value="a summary of how well I match this job and what to highlight">🎯 match analysis</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ai" onclick="tailorResume()">✨ tailor it</button>
+    </div>
+    <div id="resume-result"></div>
+    <div class="btn-row" id="resume-actions" style="display:none">
+      <button class="btn btn-primary btn-sm" onclick="copyResume()">📋 copy result</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('tracker',this)">
+    <span class="nav-icon">🌱</span>
+    <span class="nav-label">tracker</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('network',this)">
+    <span class="nav-icon">🤝</span>
+    <span class="nav-label">network</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('email',this)">
+    <span class="nav-icon">✉️</span>
+    <span class="nav-label">email</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('resume',this)">
+    <span class="nav-icon">✂️</span>
+    <span class="nav-label">tailor</span>
+  </button>
+</nav>
+
+<!-- MODAL: ADD APPLICATION -->
+<div class="modal-overlay hidden" id="modal-add-app" onclick="closeModalOutside(event,'modal-add-app')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-app-title">add application 🌱</div>
+    <input type="hidden" id="app-edit-id" value="">
+    <div class="form-group"><label class="form-label">company</label><input type="text" id="app-company" placeholder="e.g. Spotify" /></div>
+    <div class="form-group"><label class="form-label">role</label><input type="text" id="app-role" placeholder="e.g. UX Designer" /></div>
+    <div class="form-group"><label class="form-label">status</label>
+      <select id="app-status">
+        <option value="saved">💜 saved</option>
+        <option value="applied">🔵 applied</option>
+        <option value="interview">🟡 interview</option>
+        <option value="offer">🟢 offer</option>
+        <option value="rejected">🔴 rejected</option>
+        <option value="ghosted">⚫ ghosted</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">job link (optional)</label><input type="url" id="app-link" placeholder="https://..." /></div>
+    <div class="form-group"><label class="form-label">notes</label><textarea id="app-notes" rows="2" placeholder="anything to remember..."></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:1" onclick="saveApp()">save 🌱</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-add-app')">cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD NETWORK -->
+<div class="modal-overlay hidden" id="modal-add-net" onclick="closeModalOutside(event,'modal-add-net')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">add contact 🤝</div>
+    <input type="hidden" id="net-edit-id" value="">
+    <div class="form-group"><label class="form-label">name</label><input type="text" id="net-name" placeholder="e.g. Priya Sharma" /></div>
+    <div class="form-group"><label class="form-label">company</label><input type="text" id="net-company" placeholder="e.g. Meta" /></div>
+    <div class="form-group"><label class="form-label">role / title</label><input type="text" id="net-role" placeholder="e.g. Recruiter" /></div>
+    <div class="form-group"><label class="form-label">contact (linkedin / email)</label><input type="text" id="net-contact" placeholder="linkedin.com/in/..." /></div>
+    <div class="form-group"><label class="form-label">status</label>
+      <select id="net-status">
+        <option value="pending">💙 to reach out</option>
+        <option value="connected">🟢 connected</option>
+        <option value="replied">🟡 replied</option>
+        <option value="meeting">🎉 meeting!</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">notes</label><textarea id="net-notes" rows="2" placeholder="how you know them, what to follow up on..."></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:1" onclick="saveNet()">save 🤝</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-add-net')">cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+let API = localStorage.getItem('grow_api') || '';
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+
+function saveConfig() {
+  const val = document.getElementById('api-input').value.trim();
+  if (!val.startsWith('http')) { alert('please paste a valid URL!'); return; }
+  API = val;
+  localStorage.setItem('grow_api', API);
+  document.getElementById('config-screen').classList.add('hidden');
+  init();
+}
+function skipConfig() {
+  API = '';
+  document.getElementById('config-screen').classList.add('hidden');
+  init();
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let apps = [], nets = [], emails = [];
+let nextId = Date.now();
+
+const nudges = [
+  {i:'💪', t:'Apply to one job today. Just one!'},
+  {i:'🎯', t:'Customize your resume for the next application.'},
+  {i:'🤝', t:'Reach out to one person in your network today.'},
+  {i:'✨', t:'Update your LinkedIn — recruiters are watching!'},
+  {i:'📬', t:'Follow up on applications older than 2 weeks.'},
+  {i:'🌱', t:'Every no gets you closer to a yes. Keep going!'},
+  {i:'☕', t:'Research a company you love — then apply!'},
+];
+let nudgeIdx = 0;
+
+const avatarColors = ['#D8F3DC','#DBEAFE','#FFF3CD','#FFE0E0','#F0E0FF','#E0F4F5'];
+const avatarTextColors = ['#2D6A4F','#1E40AF','#7C4A00','#B91C1C','#7B2FBE','#457B9D'];
+
+// ── PAGES ──────────────────────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── MODALS ─────────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function closeModalOutside(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+// ── SYNC STATUS ────────────────────────────────────────────────────────────
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot) return;
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = label;
+}
+
+// ── FETCH FROM SHEETS ──────────────────────────────────────────────────────
+async function fetchAll() {
+  if (!API) {
+    apps = JSON.parse(localStorage.getItem('grow_apps') || '[]');
+    nets = JSON.parse(localStorage.getItem('grow_nets') || '[]');
+    emails = JSON.parse(localStorage.getItem('grow_emails') || '[]');
+    setSyncStatus('ok', 'local storage');
+    renderAll();
+    document.getElementById('loading-overlay').classList.add('hidden');
+    return;
+  }
+  setSyncStatus('syncing', 'loading...');
+  try {
+    const res = await fetch(API + '?t=' + Date.now());
+    const data = await res.json();
+    apps   = (data.applications || []);
+    nets   = (data.networking   || []);
+    emails = (data.emails       || []);
+    setSyncStatus('ok', 'synced ✓');
+    renderAll();
+  } catch(e) {
+    setSyncStatus('err', 'offline');
+    apps   = JSON.parse(localStorage.getItem('grow_apps')   || '[]');
+    nets   = JSON.parse(localStorage.getItem('grow_nets')   || '[]');
+    emails = JSON.parse(localStorage.getItem('grow_emails') || '[]');
+    renderAll();
+  }
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+async function sheetSave(sheet, item) {
+  localStorage.setItem('grow_' + sheet, JSON.stringify(
+    sheet === 'apps' ? apps : sheet === 'nets' ? nets : emails
+  ));
+  if (!API) return;
+  setSyncStatus('syncing', 'saving...');
+  try {
+    await fetch(API, { method:'POST', body: JSON.stringify({ action:'save', sheet, item }) });
+    setSyncStatus('ok', 'synced ✓');
+  } catch(e) { setSyncStatus('err', 'save failed'); }
+}
+
+async function sheetDelete(sheet, id) {
+  localStorage.setItem('grow_' + sheet, JSON.stringify(
+    sheet === 'apps' ? apps : sheet === 'nets' ? nets : emails
+  ));
+  if (!API) return;
+  setSyncStatus('syncing', 'deleting...');
+  try {
+    await fetch(API, { method:'POST', body: JSON.stringify({ action:'delete', sheet, id }) });
+    setSyncStatus('ok', 'synced ✓');
+  } catch(e) { setSyncStatus('err', 'delete failed'); }
+}
+
+// ── APPLICATIONS ──────────────────────────────────────────────────────────
+function openAddApp() {
+  document.getElementById('modal-app-title').textContent = 'add application 🌱';
+  document.getElementById('app-edit-id').value = '';
+  ['app-company','app-role','app-link','app-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('app-status').value = 'saved';
+  openModal('modal-add-app');
+}
+
+function editApp(id) {
+  const a = apps.find(a => a.id == id);
+  if (!a) return;
+  document.getElementById('modal-app-title').textContent = 'edit application ✏️';
+  document.getElementById('app-edit-id').value = a.id;
+  document.getElementById('app-company').value = a.company || '';
+  document.getElementById('app-role').value = a.role || '';
+  document.getElementById('app-status').value = a.status || 'saved';
+  document.getElementById('app-link').value = a.link || '';
+  document.getElementById('app-notes').value = a.notes || '';
+  openModal('modal-add-app');
+}
+
+async function saveApp() {
+  const company = document.getElementById('app-company').value.trim();
+  const role    = document.getElementById('app-role').value.trim();
+  if (!company || !role) { alert('company and role are required!'); return; }
+  const editId  = document.getElementById('app-edit-id').value;
+  const item = {
+    id:      editId || (nextId++),
+    company, role,
+    status:  document.getElementById('app-status').value,
+    link:    document.getElementById('app-link').value.trim(),
+    notes:   document.getElementById('app-notes').value.trim(),
+    ts:      Date.now()
+  };
+  if (editId) {
+    const idx = apps.findIndex(a => a.id == editId);
+    if (idx >= 0) apps[idx] = item;
+  } else {
+    apps.unshift(item);
+  }
+  closeModal('modal-add-app');
+  renderApps();
+  await sheetSave('apps', item);
+}
+
+async function deleteApp(id) {
+  if (!confirm('delete this application?')) return;
+  apps = apps.filter(a => a.id != id);
+  renderApps();
+  await sheetDelete('apps', id);
+}
+
+function renderApps() {
+  const list = document.getElementById('apps-list');
+  // stats
+  document.getElementById('stat-applied').textContent   = apps.filter(a => a.status === 'applied').length;
+  document.getElementById('stat-interview').textContent = apps.filter(a => a.status === 'interview').length;
+  document.getElementById('stat-offer').textContent     = apps.filter(a => a.status === 'offer').length;
+  const pct = apps.length ? Math.round((apps.filter(a => ['interview','offer'].includes(a.status)).length / apps.length) * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  if (!apps.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🌱</div><p>no applications yet — add your first one!</p></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  apps.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div class="app-card-top">
+        <div>
+          <div class="app-card-company">${a.company}</div>
+          <div class="app-card-role">${a.role}</div>
+        </div>
+        <div class="app-card-actions">
+          <span class="badge badge-${a.status}">${statusLabel(a.status)}</span>
+          <button class="icon-action" onclick="editApp(${a.id})">✏️</button>
+          <button class="icon-action" onclick="deleteApp(${a.id})">🗑️</button>
+        </div>
+      </div>
+      ${a.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${a.notes}</div>` : ''}
+      ${a.link  ? `<a href="${a.link}" target="_blank" style="font-size:11px;color:var(--green);margin-top:6px;display:block">🔗 view job posting</a>` : ''}
+    `;
+    list.appendChild(div);
+  });
+}
+
+function statusLabel(s) {
+  return {saved:'💜 saved',applied:'🔵 applied',interview:'🟡 interview',offer:'🟢 offer!',rejected:'🔴 rejected',ghosted:'⚫ ghosted'}[s] || s;
+}
+
+// ── NETWORKING ────────────────────────────────────────────────────────────
+async function saveNet() {
+  const name = document.getElementById('net-name').value.trim();
+  const company = document.getElementById('net-company').value.trim();
+  if (!name) { alert('name is required!'); return; }
+  const editId = document.getElementById('net-edit-id').value;
+  const item = {
+    id:      editId || (nextId++),
+    name, company,
+    role:    document.getElementById('net-role').value.trim(),
+    contact: document.getElementById('net-contact').value.trim(),
+    status:  document.getElementById('net-status').value,
+    notes:   document.getElementById('net-notes').value.trim(),
+    ts:      Date.now()
+  };
+  if (editId) {
+    const idx = nets.findIndex(n => n.id == editId);
+    if (idx >= 0) nets[idx] = item;
+  } else {
+    nets.unshift(item);
+  }
+  closeModal('modal-add-net');
+  renderNets();
+  await sheetSave('nets', item);
+}
+
+async function deleteNet(id) {
+  if (!confirm('remove this contact?')) return;
+  nets = nets.filter(n => n.id != id);
+  renderNets();
+  await sheetDelete('nets', id);
+}
+
+function editNet(id) {
+  const n = nets.find(n => n.id == id);
+  if (!n) return;
+  document.getElementById('net-edit-id').value = n.id;
+  document.getElementById('net-name').value    = n.name || '';
+  document.getElementById('net-company').value = n.company || '';
+  document.getElementById('net-role').value    = n.role || '';
+  document.getElementById('net-contact').value = n.contact || '';
+  document.getElementById('net-status').value  = n.status || 'pending';
+  document.getElementById('net-notes').value   = n.notes || '';
+  openModal('modal-add-net');
+}
+
+function renderNets() {
+  const list = document.getElementById('net-list');
+  if (!nets.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🤝</div><p>no contacts yet — start building your network!</p></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  nets.forEach((n, i) => {
+    const initials = n.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const ci = i % avatarColors.length;
+    const netStatusLabel = {pending:'💙 to reach out',connected:'🟢 connected',replied:'🟡 replied',meeting:'🎉 meeting!'}[n.status] || n.status;
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.display = 'flex';
+    div.style.gap = '12px';
+    div.style.alignItems = 'flex-start';
+    div.innerHTML = `
+      <div class="net-avatar" style="background:${avatarColors[ci]};color:${avatarTextColors[ci]}">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700">${n.name}</div>
+            <div style="font-size:12px;color:var(--muted)">${n.role ? n.role + ' · ' : ''}${n.company || ''}</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="icon-action" onclick="editNet(${n.id})">✏️</button>
+            <button class="icon-action" onclick="deleteNet(${n.id})">🗑️</button>
+          </div>
+        </div>
+        <div style="margin-top:6px"><span class="badge badge-${n.status}">${netStatusLabel}</span></div>
+        ${n.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:6px">${n.notes}</div>` : ''}
+        ${n.contact ? `<a href="${n.contact.startsWith('http') ? n.contact : 'https://'+n.contact}" target="_blank" style="font-size:11px;color:var(--green);margin-top:4px;display:block">🔗 ${n.contact}</a>` : ''}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ── AI: COLD EMAIL ────────────────────────────────────────────────────────
+let generatedEmail = '';
+
+async function generateEmail() {
+  const to      = document.getElementById('email-to').value.trim();
+  const company = document.getElementById('email-company').value.trim();
+  const role    = document.getElementById('email-role').value.trim();
+  const about   = document.getElementById('email-about').value.trim();
+  const tone    = document.getElementById('email-tone').value;
+
+  if (!company || !role) { alert('please fill in company and role!'); return; }
+
+  const result = document.getElementById('email-result');
+  document.getElementById('email-actions').style.display = 'none';
+  result.innerHTML = `<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>writing your email...</span></div>`;
+
+  const prompt = `Write a cold outreach email${to ? ' to ' + to : ''} at ${company} for a ${role} position.
+About the sender: ${about || 'a motivated professional looking for opportunities'}.
+Tone: ${tone}.
+Keep it concise (under 150 words), genuine, not salesy. Include a subject line at the top formatted as "Subject: ...".
+Don't use clichés like "I hope this email finds you well". Make it feel human and real.`;
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    generatedEmail = data.content?.[0]?.text || 'something went wrong, try again!';
+    result.innerHTML = `<div class="ai-box">${generatedEmail}</div>`;
+    document.getElementById('email-actions').style.display = 'flex';
+  } catch(e) {
+    result.innerHTML = `<div class="ai-box" style="border-color:var(--coral);background:var(--coral-pale)">⚠️ couldn't connect to AI. check your internet and try again!</div>`;
+  }
+}
+
+function copyEmail() {
+  navigator.clipboard.writeText(generatedEmail).then(() => alert('copied to clipboard! ✨'));
+}
+
+async function saveEmail() {
+  if (!generatedEmail) return;
+  const item = {
+    id:      nextId++,
+    to:      document.getElementById('email-to').value.trim(),
+    company: document.getElementById('email-company').value.trim(),
+    role:    document.getElementById('email-role').value.trim(),
+    body:    generatedEmail,
+    sent:    false,
+    ts:      Date.now()
+  };
+  emails.unshift(item);
+  renderEmails();
+  await sheetSave('emails', item);
+}
+
+function renderEmails() {
+  const list = document.getElementById('saved-emails-list');
+  if (!emails.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">✉️</div><p>no saved emails yet</p></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  emails.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700">${e.company}</div>
+          <div style="font-size:12px;color:var(--muted)">${e.role}${e.to ? ' · ' + e.to : ''}</div>
+        </div>
+        <span class="badge ${e.sent ? 'badge-sent' : 'badge-saved'}">${e.sent ? '✅ sent' : '💾 saved'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;max-height:60px;overflow:hidden">${e.body?.substring(0,120)}...</div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn btn-outline btn-sm" onclick="copyEmailById(${e.id})">📋 copy</button>
+        <button class="btn btn-primary btn-sm" onclick="markSent(${e.id})">${e.sent ? '✓ sent' : 'mark sent'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEmail(${e.id})">🗑️</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function copyEmailById(id) {
+  const e = emails.find(e => e.id == id);
+  if (e) navigator.clipboard.writeText(e.body).then(() => alert('copied! ✨'));
+}
+
+async function markSent(id) {
+  const e = emails.find(e => e.id == id);
+  if (e) { e.sent = true; renderEmails(); await sheetSave('emails', e); }
+}
+
+async function deleteEmail(id) {
+  emails = emails.filter(e => e.id != id);
+  renderEmails();
+  await sheetDelete('emails', id);
+}
+
+// ── AI: RESUME TAILOR ─────────────────────────────────────────────────────
+let tailoredResult = '';
+
+async function tailorResume() {
+  const jd     = document.getElementById('jd-text').value.trim();
+  const resume = document.getElementById('resume-text').value.trim();
+  const type   = document.getElementById('tailor-type').value;
+
+  if (!jd || !resume) { alert('please fill in both fields!'); return; }
+
+  const result = document.getElementById('resume-result');
+  document.getElementById('resume-actions').style.display = 'none';
+  result.innerHTML = `<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>tailoring your resume...</span></div>`;
+
+  const prompt = `Job Description:\n${jd}\n\nCandidate's resume/experience:\n${resume}\n\nTask: Generate ${type}.\n\nBe specific, actionable, and use strong action verbs. Format clearly.`;
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    tailoredResult = data.content?.[0]?.text || 'something went wrong!';
+    result.innerHTML = `<div class="ai-box">${tailoredResult}</div>`;
+    document.getElementById('resume-actions').style.display = 'flex';
+  } catch(e) {
+    result.innerHTML = `<div class="ai-box" style="border-color:var(--coral);background:var(--coral-pale)">⚠️ couldn't connect to AI. try again!</div>`;
+  }
+}
+
+function copyResume() {
+  navigator.clipboard.writeText(tailoredResult).then(() => alert('copied! ✨'));
+}
+
+// ── NUDGE ──────────────────────────────────────────────────────────────────
+function nextNudge() {
+  nudgeIdx = (nudgeIdx + 1) % nudges.length;
+  document.getElementById('nudge-icon').textContent = nudges[nudgeIdx].i;
+  document.getElementById('nudge-text').textContent = nudges[nudgeIdx].t;
+}
+
+// ── RENDER ALL ─────────────────────────────────────────────────────────────
+function renderAll() { renderApps(); renderNets(); renderEmails(); }
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+function init() {
+  fetchAll();
+  setInterval(fetchAll, 30000);
+}
+
+// show config if no API set
+if (!API) {
+  document.getElementById('loading-overlay').classList.add('hidden');
+  document.getElementById('config-screen').classList.remove('hidden');
+  // pre-fill if they have one saved
+  const saved = localStorage.getItem('grow_api');
+  if (saved) document.getElementById('api-input').value = saved;
+} else {
+  document.getElementById('config-screen').classList.add('hidden');
+  init();
+}
+</script>
+</body>
+</html>
