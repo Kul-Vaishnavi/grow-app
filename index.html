@@ -164,6 +164,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .config-screen h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px}
 .config-screen p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;max-width:320px}
 .config-input{width:100%;max-width:360px;margin-bottom:12px}
+
+/* CONNECTOR GRID */
+.connector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.connector-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.connector-btn:hover{border-color:var(--green-light);background:var(--green-pale)}
+.connector-btn:active{transform:scale(0.96)}
+.connector-icon{font-size:20px}
+.section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -270,6 +278,113 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div id="saved-emails-list"></div>
 </div>
 
+<!-- PAGE: FIND -->
+<div class="page" id="page-find">
+  <div class="page-header">
+    <h1>find 🔍</h1>
+    <p>search jobs & get AI help applying</p>
+  </div>
+
+  <!-- Job Search Connectors -->
+  <div class="card">
+    <div class="section-label">search jobs</div>
+    <div class="form-group">
+      <label class="form-label">job title / keywords</label>
+      <input type="text" id="find-query" placeholder="e.g. Product Designer, Data Analyst..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">location</label>
+      <input type="text" id="find-location" placeholder="e.g. New York, Remote..." />
+    </div>
+    <div class="section-label" style="margin-top:8px">open search on</div>
+    <div class="connector-grid">
+      <button class="connector-btn" onclick="searchOn('indeed')">
+        <span class="connector-icon">🔵</span>Indeed
+      </button>
+      <button class="connector-btn" onclick="searchOn('linkedin')">
+        <span class="connector-icon">💼</span>LinkedIn
+      </button>
+      <button class="connector-btn" onclick="searchOn('glassdoor')">
+        <span class="connector-icon">🟢</span>Glassdoor
+      </button>
+      <button class="connector-btn" onclick="searchOn('wellfound')">
+        <span class="connector-icon">🚀</span>Wellfound
+      </button>
+      <button class="connector-btn" onclick="searchOn('google')">
+        <span class="connector-icon">🔍</span>Google Jobs
+      </button>
+      <button class="connector-btn" onclick="searchOn('simplyhired')">
+        <span class="connector-icon">📋</span>SimplyHired
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">opens the job board with your search — find a job you like, then use the AI assistant below to help apply!</div>
+  </div>
+
+  <!-- My Profile -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="section-label" style="margin:0">👤 my profile</div>
+      <button class="btn btn-outline btn-sm" id="profile-toggle-btn" onclick="toggleProfile()">edit</button>
+    </div>
+    <div id="profile-view">
+      <div style="font-size:12px;color:var(--muted);line-height:1.5" id="profile-preview">no profile saved yet — add yours so AI can write your applications!</div>
+    </div>
+    <div id="profile-edit" style="display:none">
+      <div class="form-group"><label class="form-label">your name</label><input type="text" id="profile-name" placeholder="e.g. Alex Johnson" /></div>
+      <div class="form-group"><label class="form-label">current / most recent role</label><input type="text" id="profile-current-role" placeholder="e.g. Junior UX Designer at Acme" /></div>
+      <div class="form-group"><label class="form-label">years of experience</label><input type="text" id="profile-exp" placeholder="e.g. 3 years in product design" /></div>
+      <div class="form-group"><label class="form-label">key skills</label><textarea id="profile-skills" rows="2" placeholder="e.g. Figma, user research, prototyping, React..."></textarea></div>
+      <div class="form-group"><label class="form-label">background summary</label><textarea id="profile-summary" rows="3" placeholder="2-3 sentences about your experience and what you're looking for..."></textarea></div>
+      <div class="form-group"><label class="form-label">target role / industry</label><input type="text" id="profile-target" placeholder="e.g. Product Designer at tech startups" /></div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="saveProfile()">save profile</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleProfile()">cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Pack Generator -->
+  <div class="card">
+    <div class="section-label">🗂️ application pack generator</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">paste a job description → AI fills out all the common application fields for you. copy each answer straight into the form as you go.</div>
+    <div class="form-group">
+      <label class="form-label">job description</label>
+      <textarea id="pack-jd" rows="5" placeholder="paste the full job description from Indeed, LinkedIn, etc..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ai" onclick="generatePack()">✨ fill my application</button>
+    </div>
+    <div id="pack-result"></div>
+  </div>
+
+  <!-- Quick AI Help -->
+  <div class="card">
+    <div class="section-label">⚡ quick AI help</div>
+    <div class="form-group">
+      <label class="form-label">paste the job description</label>
+      <textarea id="apply-jd" rows="4" placeholder="paste the job description..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">what do you need?</label>
+      <select id="apply-type">
+        <option value="fit">🎯 am I a good fit? (match analysis)</option>
+        <option value="cover">💌 write my cover letter</option>
+        <option value="questions">🎤 interview prep questions</option>
+        <option value="highlight">✨ what skills to highlight</option>
+        <option value="why">💡 answer "why do you want this role?"</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ai" onclick="aiApplyHelp()">✨ get AI help</button>
+    </div>
+    <div id="apply-result"></div>
+    <div class="btn-row" id="apply-actions" style="display:none">
+      <button class="btn btn-primary btn-sm" onclick="copyApply()">📋 copy</button>
+      <button class="btn btn-outline btn-sm" onclick="saveApplyToTracker()">+ save to tracker</button>
+    </div>
+  </div>
+</div>
+
 <!-- PAGE: RESUME -->
 <div class="page" id="page-resume">
   <div class="page-header">
@@ -309,6 +424,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <button class="nav-btn active" onclick="showPage('tracker',this)">
     <span class="nav-icon">🌱</span>
     <span class="nav-label">tracker</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('find',this)">
+    <span class="nav-icon">🔍</span>
+    <span class="nav-label">find</span>
   </button>
   <button class="nav-btn" onclick="showPage('network',this)">
     <span class="nav-icon">🤝</span>
@@ -676,6 +795,230 @@ function renderNets() {
   });
 }
 
+// ── PROFILE ───────────────────────────────────────────────────────────────
+let profileEditing = false;
+
+function loadProfile() {
+  const p = JSON.parse(localStorage.getItem('grow_profile') || '{}');
+  const preview = document.getElementById('profile-preview');
+  if (!preview) return;
+  if (p.name || p.summary) {
+    preview.innerHTML = `<strong style="font-size:13px;color:var(--text)">${p.name || ''}</strong>`
+      + (p.currentRole ? `<br><span style="color:var(--muted);font-size:12px">${p.currentRole}</span>` : '')
+      + (p.skills     ? `<br><span style="font-size:12px;color:var(--muted);margin-top:2px;display:block">🛠 ${p.skills}</span>` : '')
+      + (p.summary    ? `<br><span style="font-size:12px;margin-top:4px;display:block">${p.summary}</span>` : '');
+  }
+  if (p.name)        document.getElementById('profile-name').value = p.name;
+  if (p.currentRole) document.getElementById('profile-current-role').value = p.currentRole;
+  if (p.exp)         document.getElementById('profile-exp').value = p.exp;
+  if (p.skills)      document.getElementById('profile-skills').value = p.skills;
+  if (p.summary)     document.getElementById('profile-summary').value = p.summary;
+  if (p.target)      document.getElementById('profile-target').value = p.target;
+}
+
+function saveProfile() {
+  const p = {
+    name:        document.getElementById('profile-name').value.trim(),
+    currentRole: document.getElementById('profile-current-role').value.trim(),
+    exp:         document.getElementById('profile-exp').value.trim(),
+    skills:      document.getElementById('profile-skills').value.trim(),
+    summary:     document.getElementById('profile-summary').value.trim(),
+    target:      document.getElementById('profile-target').value.trim()
+  };
+  localStorage.setItem('grow_profile', JSON.stringify(p));
+  loadProfile();
+  document.getElementById('profile-edit').style.display = 'none';
+  document.getElementById('profile-view').style.display = '';
+  document.getElementById('profile-toggle-btn').textContent = 'edit';
+  profileEditing = false;
+}
+
+function toggleProfile() {
+  profileEditing = !profileEditing;
+  document.getElementById('profile-edit').style.display = profileEditing ? '' : 'none';
+  document.getElementById('profile-view').style.display = profileEditing ? 'none' : '';
+  document.getElementById('profile-toggle-btn').textContent = profileEditing ? 'close' : 'edit';
+}
+
+function getProfileText() {
+  const p = JSON.parse(localStorage.getItem('grow_profile') || '{}');
+  if (!p.name && !p.summary) return 'No profile saved.';
+  return [
+    p.name        ? `Name: ${p.name}` : '',
+    p.currentRole ? `Current Role: ${p.currentRole}` : '',
+    p.exp         ? `Experience: ${p.exp}` : '',
+    p.skills      ? `Skills: ${p.skills}` : '',
+    p.summary     ? `Background: ${p.summary}` : '',
+    p.target      ? `Target: ${p.target}` : ''
+  ].filter(Boolean).join('\n');
+}
+
+// ── APPLICATION PACK GENERATOR ────────────────────────────────────────────
+async function generatePack() {
+  const jd = document.getElementById('pack-jd').value.trim();
+  if (!jd) { alert('please paste a job description!'); return; }
+
+  const profile = getProfileText();
+  const result  = document.getElementById('pack-result');
+  result.innerHTML = `<div class="ai-loading" style="margin-top:12px"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>building your application pack...</span></div>`;
+
+  const prompt = `You are helping someone fill out a job application form. Generate ready-to-paste answers for each common application field below. Base them on the job description and the candidate's profile.
+
+Job Description:
+${jd}
+
+Candidate Profile:
+${profile}
+
+Format your response EXACTLY like this — use these exact headers with === delimiters on their own lines:
+
+===COVER LETTER===
+[Write a genuine 200-word cover letter — no "I am writing to apply for..." openers]
+
+===ABOUT YOURSELF===
+[2-3 sentence professional summary / elevator pitch tailored to this specific role]
+
+===WHY THIS ROLE===
+[2-3 sentences — specific reasons why they want this role and company]
+
+===RELEVANT EXPERIENCE===
+[A focused paragraph on their most relevant background for this position]
+
+===BIGGEST STRENGTH===
+[1-2 sentences on their standout strength for this job with a brief example]
+
+===ADDITIONAL INFORMATION===
+[Any other compelling point — portfolio, achievement, availability, enthusiasm]
+
+Make every answer genuine, specific, and copy-paste ready. Avoid generic filler phrases.`;
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    if (!text) { result.innerHTML = `<div class="ai-box" style="border-color:var(--coral);background:var(--coral-pale);margin-top:12px">⚠️ something went wrong, try again!</div>`; return; }
+    renderPack(text);
+  } catch(e) {
+    result.innerHTML = `<div class="ai-box" style="border-color:var(--coral);background:var(--coral-pale);margin-top:12px">⚠️ couldn't connect to AI. check your internet and try again!</div>`;
+  }
+}
+
+function renderPack(text) {
+  const sections = [
+    ['COVER LETTER',         '💌 Cover Letter'],
+    ['ABOUT YOURSELF',       '👤 About Yourself'],
+    ['WHY THIS ROLE',        '💡 Why This Role'],
+    ['RELEVANT EXPERIENCE',  '💼 Relevant Experience'],
+    ['BIGGEST STRENGTH',     '💪 Biggest Strength'],
+    ['ADDITIONAL INFORMATION','✨ Additional Info']
+  ];
+
+  let html = '<div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">';
+  html += `<div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:2px">✅ your application pack is ready — copy each answer as you fill out the form!</div>`;
+
+  for (const [key, label] of sections) {
+    const regex = new RegExp(`===${key}===([\\s\\S]*?)(?====|$)`, 'i');
+    const match = text.match(regex);
+    if (!match) continue;
+    const content = match[1].trim();
+    const safe    = content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const eid     = 'pack-' + key.replace(/\s+/g,'-');
+    html += `
+      <div style="background:var(--purple-pale);border:1.5px solid var(--purple);border-radius:14px;padding:13px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--purple-dark);text-transform:uppercase;letter-spacing:0.5px">${label}</div>
+          <button class="btn btn-outline btn-sm" onclick="copyPackSection('${eid}')" style="font-size:11px;padding:4px 10px;border-radius:8px">📋 copy</button>
+        </div>
+        <div id="${eid}" style="font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap">${safe}</div>
+      </div>`;
+  }
+  html += '</div>';
+  document.getElementById('pack-result').innerHTML = html;
+}
+
+function copyPackSection(id) {
+  const el = document.getElementById(id);
+  if (el) navigator.clipboard.writeText(el.textContent).then(() => alert('copied! ✨'));
+}
+
+// ── FIND: JOB CONNECTORS ─────────────────────────────────────────────────
+function searchOn(platform) {
+  const query = document.getElementById('find-query').value.trim();
+  const loc   = document.getElementById('find-location').value.trim();
+  const q = encodeURIComponent(query);
+  const l = encodeURIComponent(loc);
+  const urls = {
+    indeed:     `https://www.indeed.com/jobs?q=${q}&l=${l}`,
+    linkedin:   `https://www.linkedin.com/jobs/search/?keywords=${q}&location=${l}`,
+    glassdoor:  `https://www.glassdoor.com/Job/jobs.htm?sc.keyword=${encodeURIComponent(query + (loc ? ' ' + loc : ''))}`,
+    wellfound:  `https://wellfound.com/jobs?role=${q}&location=${l}`,
+    google:     `https://www.google.com/search?q=${encodeURIComponent(query + ' jobs' + (loc ? ' ' + loc : ''))}&ibp=htl;jobs`,
+    simplyhired:`https://www.simplyhired.com/search?q=${q}&l=${l}`
+  };
+  if (urls[platform]) window.open(urls[platform], '_blank');
+}
+
+// ── FIND: AI APPLY ASSISTANT ──────────────────────────────────────────────
+let applyResult = '';
+
+async function aiApplyHelp() {
+  const jd     = document.getElementById('apply-jd').value.trim();
+  const resume = document.getElementById('apply-resume').value.trim();
+  const type   = document.getElementById('apply-type').value;
+  if (!jd) { alert('please paste a job description first!'); return; }
+
+  const result = document.getElementById('apply-result');
+  document.getElementById('apply-actions').style.display = 'none';
+  result.innerHTML = `<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>working on it...</span></div>`;
+
+  const bg = resume || 'background not provided';
+  const prompts = {
+    fit:      `Job Description:\n${jd}\n\nCandidate background:\n${bg}\n\nAnalyze how well this candidate fits this job. Give an honest match percentage, list their top 3 strengths for this role, identify 2-3 gaps or areas to address, and give a clear recommendation on whether they should apply. Be specific and actionable.`,
+    cover:    `Job Description:\n${jd}\n\nCandidate background:\n${bg}\n\nWrite a compelling, genuine cover letter for this job. Keep it under 250 words. Make it specific to the role and company — no generic opener like "I am writing to apply for...". Show personality and real enthusiasm.`,
+    questions:`Job Description:\n${jd}\n\nGenerate 8 likely interview questions for this role. Include a mix of behavioral, situational, and role-specific questions. For each, include a brief tip on how to answer it well.`,
+    highlight:`Job Description:\n${jd}\n\nCandidate background:\n${bg}\n\nIdentify the top 5 skills, experiences, or achievements from this candidate's background that they should spotlight for this specific role. For each, explain why it resonates with this employer.`,
+    why:      `Job Description:\n${jd}\n\nCandidate background:\n${bg}\n\nWrite a compelling, authentic 2-3 sentence answer to the interview question "Why do you want this role?" Make it specific to the company and position, not generic. Show genuine motivation.`
+  };
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await res.json();
+    applyResult = data.content?.[0]?.text || 'something went wrong, try again!';
+    result.innerHTML = `<div class="ai-box">${applyResult}</div>`;
+    document.getElementById('apply-actions').style.display = 'flex';
+  } catch(e) {
+    result.innerHTML = `<div class="ai-box" style="border-color:var(--coral);background:var(--coral-pale)">⚠️ couldn't connect to AI. check your internet and try again!</div>`;
+  }
+}
+
+function copyApply() {
+  navigator.clipboard.writeText(applyResult).then(() => alert('copied! ✨'));
+}
+
+function saveApplyToTracker() {
+  document.getElementById('modal-app-title').textContent = 'add application 🌱';
+  document.getElementById('app-edit-id').value = '';
+  ['app-company','app-role','app-link','app-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('app-status').value = 'saved';
+  openModal('modal-add-app');
+}
+
 // ── AI: COLD EMAIL ────────────────────────────────────────────────────────
 let generatedEmail = '';
 
@@ -834,6 +1177,7 @@ function renderAll() { renderApps(); renderNets(); renderEmails(); }
 // ── INIT ───────────────────────────────────────────────────────────────────
 function init() {
   fetchAll();
+  loadProfile();
   setInterval(fetchAll, 30000);
 }
 
@@ -841,13 +1185,14 @@ function init() {
 if (!API) {
   document.getElementById('loading-overlay').classList.add('hidden');
   document.getElementById('config-screen').classList.remove('hidden');
-  // pre-fill if they have one saved
   const saved = localStorage.getItem('grow_api');
   if (saved) document.getElementById('api-input').value = saved;
 } else {
   document.getElementById('config-screen').classList.add('hidden');
   init();
 }
+// always load profile (works without API)
+loadProfile();
 </script>
 </body>
 </html>
